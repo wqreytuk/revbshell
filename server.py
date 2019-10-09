@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding:utf-8 -*- 
 #
 # This software is provided under under the BSD 3-Clause License.
 # See the accompanying LICENSE file for more information.
@@ -20,7 +21,6 @@ from Queue import Queue
 from threading import Thread
 from shutil import copyfile, rmtree
 import ntpath
-
 PORT_NUMBER = 8080
 
 class myHandler(BaseHTTPRequestHandler):
@@ -67,10 +67,12 @@ class myHandler(BaseHTTPRequestHandler):
         # File upload
         form = cgi.FieldStorage(fp=self.rfile, headers=self.headers, environ={'REQUEST_METHOD': 'POST'})
         #cmd_data = form['cmd'].file.read().decode('utf-8')
-        #由于本地的terminal编码是gbk，所以当我们输出unicode字符串的时候，terminal会尝试使用gbk编码并输出，但是有些unicode字符，gbk是无法编码的，所以我们需要再加一个encode("GBK", "ignore")来缓解报错
-        #报错信息：UnicodeEncodeError: 'gbk' codec can't encode character u'\ufeff' in position 21: illegal multibyte sequence
-        result_filename = form['result'].filename.decode('utf-8').encode("GBK", "ignore")
-        result_data = form['result'].file.read().decode('utf-8').encode("GBK", "ignore")
+        '''
+        由于本地的terminal编码是gbk，所以当我们输出unicode字符串的时候，terminal会尝试使用gbk编码并输出，但是有些unicode字符，gbk是无法编码的，所以我们需要再加一个encode("GBK", "ignore")来缓解报错
+        报错信息：UnicodeEncodeError: 'gbk' codec can't encode character u'\ufeff' in position 21: illegal multibyte sequence
+        '''
+        result_filename = form['result'].filename
+        result_data = form['result'].file.read().decode('utf-8')
 
         # Show '> ' command input string after command output
         if context:
@@ -238,7 +240,7 @@ def main():
                 print 'Shutting down %s' % os.path.basename(__file__)
                 exit(0)
 
-        commands.put(' '.join([cmd, args]))
+        commands.put(' '.join([cmd, args]).decode("ascii", "ignore").encode("utf-8"))
 
 if __name__ == '__main__':
     main()

