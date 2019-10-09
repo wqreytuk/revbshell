@@ -307,11 +307,16 @@ While True
     strInfo = Empty
 Wend
 
-
+' 该函数主要用来格式化输出
 Function PadRight(strInput, intLength)
     Dim strOutput
+    ' vbs中&符号可用来拼接字符串
+    ' Left函数为从字符串左侧截取指定数量的字符
+    ' Space函数用于返回特定数目的空格
     strOutput = LEFT(strInput & Space(intLength), intLength)
-    strOutput = LEFT(strOutput & String(intLength, " "), intLength)
+    ' String函数可以重复指定字符intLength次，String(intLength, " ")会生成一个包含intLength个空格的字符串
+    ' strOutput = LEFT(strOutput & String(intLength, " "), intLength)
+    ' 上面两行代码的作用是相同的，把第二行注释掉即可
     PadRight = strOutput
 End Function
 
