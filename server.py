@@ -23,7 +23,6 @@ import ntpath
 
 PORT_NUMBER = 8080
 
-
 class myHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         # File download
@@ -67,14 +66,16 @@ class myHandler(BaseHTTPRequestHandler):
 
         # File upload
         form = cgi.FieldStorage(fp=self.rfile, headers=self.headers, environ={'REQUEST_METHOD': 'POST'})
-        cmd_data = form['cmd'].file.read()
-        result_filename = form['result'].filename
-        result_data = form['result'].file.read()
+        #cmd_data = form['cmd'].file.read().decode('utf-8')
+        #由于本地的terminal编码是gbk，所以当我们输出unicode字符串的时候，terminal会尝试使用gbk编码并输出，但是有些unicode字符，gbk是无法编码的，所以我们需要再加一个encode("GBK", "ignore")来缓解报错
+        #报错信息：UnicodeEncodeError: 'gbk' codec can't encode character u'\ufeff' in position 21: illegal multibyte sequence
+        result_filename = form['result'].filename.decode('utf-8').encode("GBK", "ignore")
+        result_data = form['result'].file.read().decode('utf-8').encode("GBK", "ignore")
 
         # Show '> ' command input string after command output
         if context:
             cmd_data = cmd_data.replace(context + ' ', '')
-        print cmd_data
+        #print cmd_data
 
         # Store file
         if self.path == '/upload':
