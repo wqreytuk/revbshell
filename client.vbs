@@ -36,7 +36,7 @@ Dim arrSplitUrl, strFilename, stream
 
 ' Configuration
 Dim strHost, strPort, strUrl, strCD, intSleep
-strHost = "144.34.164.217"
+strHost = "127.0.0.1"
 strPort = "8080"
 intSleep = 5000
 strUrl = "http://" & strHost & ":" & strPort
