@@ -380,11 +380,11 @@ Function DoHttpBinaryPost(strActionType, strText, strFilename, binData)
     DoHttpBinaryPost = http.ResponseText
 End Function
 
-
+' 该函数用于将字符串转换成二进制数据
 Function StringToBinary(Text)
     Dim stream: Set stream = CreateObject("Adodb.Stream")
     stream.Type = 2 'adTypeText
-    stream.CharSet = "us-ascii"
+    ' stream.CharSet = "us-ascii"
 
     ' Store text in stream
     stream.Open
