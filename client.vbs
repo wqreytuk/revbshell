@@ -424,10 +424,12 @@ Function StringToBinary(Text)
 End Function
 
 
+
+
 Function Utf2Gbk(Text)
     Dim stream: Set stream = CreateObject("Adodb.Stream")
     stream.Type = 2 'adTypeText
-    stream.CharSet = "utf-8"
+    stream.CharSet = "cp1251"
 
     ' Store text in stream
     stream.Open
@@ -435,8 +437,8 @@ Function Utf2Gbk(Text)
 
     ' Change stream type To binary
     stream.Position = 0
-    stream.Type = 2 'adTypeBinary
-    stream.CharSet = "utf-8"
+    stream.Type = 2
+    stream.CharSet = "cp1251"
     ' Return binary data
     Utf2Gbk = stream.Read
 End Function

